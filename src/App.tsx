@@ -115,6 +115,25 @@ function App() {
     setExpandedHistoryId(prev => prev === id ? null : id);
   };
 
+  const handleRestoreHistory = (record: HistoryRecord) => {
+    const filledCount = Object.values(values).filter(v => v !== '').length;
+    if (filledCount >= 2 && !error) {
+      const newRecord: HistoryRecord = {
+        id: Date.now().toString(),
+        timestamp: new Date(),
+        values: { ...values },
+        advValues: { ...advValues }
+      };
+      setHistory(prev => [newRecord, ...prev.filter(r => r.id !== record.id)]);
+    } else {
+      setHistory(prev => prev.filter(r => r.id !== record.id));
+    }
+    
+    setValues(record.values);
+    setAdvValues(record.advValues);
+    setExpandedHistoryId(null);
+  };
+
   const calculateMissing = (currentValues: Values, modifiedFields: Field[]) => {
     if (modifiedFields.length < 2) return currentValues;
 
@@ -560,31 +579,41 @@ function App() {
 
                 return (
                   <div key={record.id} className="history-item">
-                    <div className="history-summary" onClick={() => toggleHistoryItem(record.id)}>
-                      <div>
+                    <div className="history-summary" onClick={() => toggleHistoryItem(record.id)} style={{ cursor: 'pointer' }}>
+                      <div style={{ flex: 1 }}>
                         <div className="history-title">Pre: {preStr || '?'} • Eq: {eqStr}</div>
                         <div className="history-time">{formatTime(record.timestamp)}</div>
                       </div>
-                      {isExpanded ? <ChevronUp size={16} color="var(--text-secondary)" /> : <ChevronDown size={16} color="var(--text-secondary)" />}
+                      <div style={{ padding: '0.2rem', display: 'flex', alignItems: 'center' }}>
+                        {isExpanded ? <ChevronUp size={16} color="var(--text-secondary)" /> : <ChevronDown size={16} color="var(--text-secondary)" />}
+                      </div>
                     </div>
                     
                     {isExpanded && (
-                      <div className="history-details">
-                        <div className="history-detail-row">
-                          <span className="history-detail-label">Pre-money</span>
-                          <span className="history-detail-value">₹{record.values.preMoney || '-'}</span>
-                        </div>
+                      <div 
+                        className="history-details"
+                        onClick={() => handleRestoreHistory(record)}
+                        style={{ cursor: 'pointer' }}
+                        title="Click to load into calculator"
+                      >
                         <div className="history-detail-row">
                           <span className="history-detail-label">Investment</span>
                           <span className="history-detail-value">₹{record.values.investment || '-'}</span>
                         </div>
                         <div className="history-detail-row">
+                          <span className="history-detail-label">Equity</span>
+                          <span className="history-detail-value">{record.values.equity ? `${record.values.equity}%` : '-'}</span>
+                        </div>
+                        <div className="history-detail-row">
+                          <span className="history-detail-label">Pre-money</span>
+                          <span className="history-detail-value">₹{record.values.preMoney || '-'}</span>
+                        </div>
+                        <div className="history-detail-row">
                           <span className="history-detail-label">Post-money</span>
                           <span className="history-detail-value">₹{record.values.postMoney || '-'}</span>
                         </div>
-                        <div className="history-detail-row">
-                          <span className="history-detail-label">Equity</span>
-                          <span className="history-detail-value">{record.values.equity ? `${record.values.equity}%` : '-'}</span>
+                        <div style={{ fontSize: '0.65rem', color: 'var(--accent-color)', textAlign: 'center', marginTop: '0.4rem', borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '0.4rem' }}>
+                          Click to restore to calculator
                         </div>
                       </div>
                     )}
