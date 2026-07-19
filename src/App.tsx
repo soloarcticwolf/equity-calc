@@ -232,7 +232,17 @@ function App() {
 
     return (
       <div className="input-group">
-        <label className="input-label">{icon} {label}</label>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <label className="input-label">{icon} {label}</label>
+          {field === 'investment' && values[field] && (
+            <button 
+              onClick={() => handleBaseChange(field, '')}
+              style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: 'var(--text-secondary)', fontSize: '0.65rem', padding: '0.1rem 0.4rem', borderRadius: '4px', cursor: 'pointer', transition: 'all 0.2s ease' }}
+            >
+              Clear
+            </button>
+          )}
+        </div>
         <div className="input-wrapper">
           {prefix && <span className="input-prefix">{prefix}</span>}
           <input
@@ -457,30 +467,74 @@ function App() {
                 </div>
               </div>
 
-              <div className="section-title" style={{ marginTop: 'auto' }}>Sensitivity Matrix (Dilution %)</div>
-              <div className="sensitivity-table-wrapper">
-                <table className="sensitivity-table">
-                  <thead>
-                    <tr>
-                      <th className="table-corner">Raise ↓ \ Pre →</th>
-                      <th>₹16 Cr</th>
-                      <th>₹18 Cr</th>
-                      <th>₹20 Cr</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {[20000000, 30000000, 40000000].map(r => (
-                      <tr key={r}>
-                        <th style={{ background: 'rgba(255,255,255,0.05)', textAlign: 'left' }}>₹{formatIndian(r)}</th>
-                        {[160000000, 180000000, 200000000].map(p => {
-                          const dilution = (r / (p + r)) * 100;
-                          return <td key={p}>{dilution.toFixed(2)}%</td>;
-                        })}
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+              {(() => {
+                const centerInv = inv || 0;
+                const centerPre = pre || 0;
+                
+                const getStepSize = (val: number) => {
+                  if (val >= 10000000) return 1000000; // 10L
+                  if (val >= 1000000) return 100000; // 1L
+                  if (val >= 100000) return 10000; // 10k
+                  return 1000;
+                };
+                
+                const generateStepsFixed = (center: number, count: number, stepSize: number) => {
+                  const arr = [];
+                  const half = Math.floor(count / 2);
+                  for (let i = -half; i <= half; i++) {
+                    const val = center + (i * stepSize);
+                    if (val > 0) arr.push(val);
+                  }
+                  return arr;
+                };
+
+                const raiseStep = getStepSize(centerInv);
+                const preStep = getStepSize(centerPre);
+
+                const raises = generateStepsFixed(centerInv, 21, raiseStep);
+                const pres = generateStepsFixed(centerPre, 21, preStep);
+
+                return (
+                  <>
+                    <div className="section-title" style={{ marginTop: 'auto' }}>Sensitivity Matrix (Dilution %)</div>
+                    <div className="sensitivity-table-wrapper">
+                      <table className="sensitivity-table">
+                        <thead>
+                          <tr>
+                            <th className="table-corner">Raise ↓ \ Pre →</th>
+                            {pres.map((p, i) => (
+                              <th key={i} style={p === centerPre ? { color: 'var(--accent-color)', background: 'rgba(59, 130, 246, 0.1)' } : {}}>
+                                ₹{formatIndian(p)}
+                              </th>
+                            ))}
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {raises.map((r, rowIdx) => (
+                            <tr key={rowIdx}>
+                              <th style={{ background: 'rgba(255,255,255,0.05)', textAlign: 'left', ...(r === centerInv ? { color: 'var(--accent-color)', borderLeft: '2px solid var(--accent-color)' } : {}) }}>
+                                ₹{formatIndian(r)}
+                              </th>
+                              {pres.map((p, colIdx) => {
+                                const dilution = p + r > 0 ? (r / (p + r)) * 100 : 0;
+                                const isCenter = r === centerInv && p === centerPre;
+                                return (
+                                  <td 
+                                    key={colIdx} 
+                                    style={isCenter ? { background: 'rgba(59, 130, 246, 0.2)', color: 'var(--accent-color)', borderColor: 'var(--accent-color)', fontWeight: 700 } : {}}
+                                  >
+                                    {dilution.toFixed(2)}%
+                                  </td>
+                                );
+                              })}
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </>
+                );
+              })()}
             </>
           )}
         </div>
