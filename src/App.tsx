@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Calculator, DollarSign, Percent, TrendingUp, Info, AlertCircle, Save, Trash2, Clock, ChevronDown, ChevronUp, Users, Settings, Flame } from 'lucide-react';
+import { Calculator, DollarSign, Percent, TrendingUp, AlertCircle, Save, Trash2, Clock, ChevronDown, ChevronUp, Users, Settings, Flame } from 'lucide-react';
 import './App.css';
 
 type Field = 'preMoney' | 'investment' | 'postMoney' | 'equity';
