@@ -42,6 +42,25 @@ body {
   flex-direction: column;
 }
 
+/* Modern Slim Scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 6px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.25);
+}
+
 h1, h2, h3, h4, h5, h6 {
   font-family: 'Outfit', sans-serif;
 }

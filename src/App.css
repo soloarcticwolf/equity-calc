@@ -349,13 +349,7 @@
   padding-right: 0.5rem;
 }
 
-.history-list::-webkit-scrollbar {
-  width: 4px;
-}
-.history-list::-webkit-scrollbar-thumb {
-  background: var(--panel-border);
-  border-radius: 4px;
-}
+
 
 .history-item {
   background: rgba(0, 0, 0, 0.2);
